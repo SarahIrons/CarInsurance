@@ -81,6 +81,7 @@ namespace CarInsurance.Controllers
         {
             if (ModelState.IsValid)
             {
+                insuree.Quote = CoverageCalculator( insuree.DateOfBirth, insuree.CarMake, insuree.CarYear, insuree.CarModel, insuree.SpeedingTickets,insuree.DUI, insuree.CoverageType);
                 db.Insurees.Add(insuree);
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -113,6 +114,7 @@ namespace CarInsurance.Controllers
         {
             if (ModelState.IsValid)
             {
+                insuree.Quote = CoverageCalculator(insuree.DateOfBirth, insuree.CarMake, insuree.CarYear, insuree.CarModel, insuree.SpeedingTickets, insuree.DUI, insuree.CoverageType);
                 db.Entry(insuree).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -164,57 +166,60 @@ namespace CarInsurance.Controllers
             DateTime Now = DateTime.Now;
             var ApplicantAge = (DateTime.Today - DateOfBirth).Days / 365;
 
-            //If the user is 18 or under, add $100 to the monthly total.
+            ////If the user is 18 or under, add $100 to the monthly total.
             if (ApplicantAge < 18)
             {
-                InsCoverage += InsCoverage + 100;
-                
+                InsCoverage += 100;    
             }
-            //If the user is from 19 to 25, add $50 to the monthly total.
+            ////If the user is from 19 to 25, add $50 to the monthly total.
             if (ApplicantAge > 18 && ApplicantAge < 25)
             {
-                InsCoverage += InsCoverage + 50;
-                
+               InsCoverage += 50;
             }
-            //If the user is 26 or older, add $25 to the monthly total. Double check your code to ensure all ages are covered.
+            ////If the user is 26 or older, add $25 to the monthly total. Double check your code to ensure all ages are covered.
             if (ApplicantAge > 26)
             {
-                 InsCoverage += InsCoverage + 25;
-                
+                InsCoverage +=  25;
             }
-
+            // If the car's year is before 2000, add $25 to the monthly total.
+            if (CarYear < 2000)
+            {
+               InsCoverage += 25;
+            }
+            // If the car's year is after 2015, add $25 to the monthly total.
             if (CarYear > 2015)
             {
-                InsCoverage += InsCoverage + 25;
+                InsCoverage += 25;
             }
+            //If the car's Make is a Porsche, add $25 to the price.
             if (CarMake == "Porsche")
-            {
-                InsCoverage += InsCoverage + 25;
+            { 
+                InsCoverage += 25;
             }
+            //If the car's Make is a Porsche and its model is a 911 Carrera, add an additional $25 to the price.
             if (CarModel == "911 Carrera")
             {
-                InsCoverage += InsCoverage + 25;
+                InsCoverage += 25;
             }
-             if (SpeedingTickets >0)
+            //Add $10 to the monthly total for every speeding ticket the user has.
+            if (SpeedingTickets > 0)
              {
-                InsCoverage += InsCoverage + (SpeedingTickets * 10);
+                InsCoverage += (SpeedingTickets * 10);
              }
-             if (DUI == true)
+            //If the user has ever had a DUI, add 25% to the total.
+            if (DUI == true)
              {
-                InsCoverage += (InsCoverage + (InsCoverage / 4));
+                InsCoverage += InsCoverage / 4;
              }
-             if(CoverageType==true)
+            //If it's full coverage, add 50% to the total.
+            if (CoverageType == true)
              {
-                InsCoverage += (InsCoverage + (InsCoverage / 2));
-             } 
+                InsCoverage += InsCoverage / 2;
+            } 
 
-
-
-            return InsCoverage;
+                return InsCoverage;
         }
 
-
-       
     }
 
 
